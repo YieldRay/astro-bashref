@@ -1,0 +1,128 @@
+---
+import { getCollection } from "astro:content";
+import { base } from "../../deploy.config.mjs";
+
+const entries = await getCollection("BashRef");
+type Entires = typeof entries;
+type Entry = Entires[number];
+
+function classifyBySlash(entries: Entires) {
+    const result: Record<string, Entry[]> = {};
+
+    for (const entry of entries) {
+        const prefix = entry.id.split("/")[0];
+        if (Reflect.has(result, prefix)) {
+            result[prefix].push(entry);
+        } else {
+            result[prefix] = [entry];
+        }
+    }
+
+    return result;
+}
+
+function removeSuffix(s: string, suffix: string) {
+    if (!suffix || !s.endsWith(suffix)) {
+        return s;
+    }
+    return s.slice(0, -suffix.length);
+}
+
+function link(s: string) {
+    return `${base}/${s}/`;
+}
+
+const cat = classifyBySlash(entries);
+---
+
+<style>
+    menu {
+        all: unset;
+        display: block;
+        padding: 2rem 1rem 1rem;
+    }
+
+    menu header {
+        position: sticky;
+        top: 0;
+    }
+
+    label {
+        cursor: pointer;
+        display: inline-block;
+        padding: 0.5rem;
+        position: fixed;
+        background: rgb(200 200 200 / 0.2);
+    }
+
+    label + input {
+        display: none;
+    }
+
+    input:checked + menu {
+        display: none;
+    }
+
+    /* default close in compact screen */
+    @media screen and (max-width: 800px) {
+        input + menu {
+            display: none;
+        }
+
+        input:checked + menu {
+            display: block;
+        }
+    }
+</style>
+
+<label for="menu-checkbox">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+        ><path
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M3 6h18M3 12h18M3 18h18"></path></svg
+    >
+</label>
+<input type="checkbox" id="menu-checkbox" />
+
+<menu>
+    <header>
+        <slot />
+    </header>
+    <ul>
+        {
+            Object.entries(cat)
+                .sort(([a], [b]) =>
+                    new Intl.Collator("zh-Hans-CN", {
+                        numeric: true,
+                        ignorePunctuation: true,
+                        caseFirst: "upper",
+                    }).compare(a, b)
+                )
+                .map(([name, list]) => {
+                    if (list.length === 1)
+                        return (
+                            <li>
+                                <a href={link(list[0].id)}>{removeSuffix(list[0].id, ".md")}</a>
+                            </li>
+                        );
+                    else
+                        return (
+                            <li>
+                                <span>{name}</span>
+                                <ul>
+                                    {list.map((item) => (
+                                        <li>
+                                            <a href={link(item.id)}>{removeSuffix(item.id, ".md").split("/").at(-1)}</a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </li>
+                        );
+                })
+        }
+    </ul>
+</menu>

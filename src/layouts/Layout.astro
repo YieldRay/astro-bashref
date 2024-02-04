@@ -1,0 +1,86 @@
+---
+import Menu from "../components/Menu.astro";
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="description" content="Astro description" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="stylesheet" href="//unpkg.com/landsoul" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+        <style is:global>
+            html,
+            body {
+                height: 100%;
+            }
+
+            ::-webkit-scrollbar {
+                background-color: #24292e;
+                width: 8px;
+                height: 8px;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background-color: #666;
+            }
+
+            code {
+                background-color: #24292e;
+                color: #e1e4e8;
+                padding: 1px 4px;
+            }
+
+            a,
+            a:hover {
+                color: aquamarine;
+                text-decoration: none;
+                transition: all 300ms;
+                border-radius: 4px;
+            }
+
+            a:hover {
+                background-color: rgb(255 255 255 / 0.5);
+            }
+
+            body {
+                display: grid;
+                grid-template-columns: auto 1fr;
+                margin: 0;
+            }
+
+            nav {
+                position: sticky;
+                top: 0;
+                max-height: 100vh;
+                overflow: auto;
+            }
+
+            @media screen and (max-width: 800px) {
+                nav {
+                    position: fixed;
+                    background: var(--landsoul-bg, Canvas);
+                    /* https://developer.mozilla.org/en-US/docs/Web/CSS/system-color */
+                }
+            }
+
+            main {
+                max-height: 100vh;
+                overflow: auto;
+                padding: 1rem;
+            }
+        </style>
+    </head>
+    <body data-theme="dark">
+        <nav>
+            <Menu />
+        </nav>
+        <main>
+            <slot />
+        </main>
+    </body>
+</html>
