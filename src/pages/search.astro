@@ -1,0 +1,28 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="BashRef">
+    <link href="/pagefind/pagefind-ui.css" rel="stylesheet" slot="head" />
+    <script src="/pagefind/pagefind-ui.js" slot="head"></script>
+    <style slot="head" is:inline>
+        #search {
+            --pagefind-ui-primary: #eeeeee;
+            --pagefind-ui-text: #eeeeee;
+            --pagefind-ui-background: #152028;
+            --pagefind-ui-border: #152028;
+            --pagefind-ui-tag: #152028;
+        }
+        #search .pagefind-ui__search-input {
+            padding: 0 2.5rem;
+        }
+    </style>
+
+    <div id="search"></div>
+
+    <script is:inline slot="head">
+        window.addEventListener("DOMContentLoaded", (event) => {
+            new PagefindUI({ element: "#search", showSubResults: true });
+        });
+    </script>
+</Layout>

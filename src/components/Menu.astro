@@ -1,12 +1,13 @@
 ---
 import { getCollection } from "astro:content";
 import { base } from "../../deploy.config.mjs";
+import Search from "./Search.astro";
 
 const entries = await getCollection("BashRef");
-type Entires = typeof entries;
-type Entry = Entires[number];
+type Entries = typeof entries;
+type Entry = Entries[number];
 
-function classifyBySlash(entries: Entires) {
+function classifyBySlash(entries: Entries) {
     const result: Record<string, Entry[]> = {};
 
     for (const entry of entries) {
@@ -32,6 +33,12 @@ function link(s: string) {
     return `${base}/${s}/`;
 }
 
+const intlCollator = new Intl.Collator("zh-Hans-CN", {
+    numeric: true,
+    ignorePunctuation: true,
+    caseFirst: "upper",
+});
+
 const cat = classifyBySlash(entries);
 ---
 
@@ -44,7 +51,7 @@ const cat = classifyBySlash(entries);
 
     menu header {
         position: sticky;
-        top: 0;
+        top: 10px;
     }
 
     label {
@@ -53,6 +60,7 @@ const cat = classifyBySlash(entries);
         padding: 0.5rem;
         position: fixed;
         background: rgb(200 200 200 / 0.2);
+        z-index: 999;
     }
 
     label + input {
@@ -73,6 +81,15 @@ const cat = classifyBySlash(entries);
             display: block;
         }
     }
+
+    menu ul {
+        list-style: none;
+        padding-left: 20px;
+    }
+
+    a.active {
+        background-color: maroon;
+    }
 </style>
 
 <label for="menu-checkbox">
@@ -90,38 +107,50 @@ const cat = classifyBySlash(entries);
 
 <menu>
     <header>
-        <slot />
+        <Search entries={entries} />
     </header>
     <ul>
         {
             Object.entries(cat)
-                .sort(([a], [b]) =>
-                    new Intl.Collator("zh-Hans-CN", {
-                        numeric: true,
-                        ignorePunctuation: true,
-                        caseFirst: "upper",
-                    }).compare(a, b)
-                )
+                .sort(([a], [b]) => intlCollator.compare(a, b))
                 .map(([name, list]) => {
-                    if (list.length === 1)
+                    if (list.length === 1) {
+                        const item = list[0];
+                        const url = link(item.id);
+                        const title = removeSuffix(item.id, ".md");
+                        const active = decodeURIComponent(Astro.url.pathname) === url;
+
                         return (
                             <li>
-                                <a href={link(list[0].id)}>{removeSuffix(list[0].id, ".md")}</a>
+                                <a href={url} class={active ? "active" : undefined}>
+                                    {title}
+                                </a>
                             </li>
                         );
-                    else
+                    } else {
                         return (
                             <li>
                                 <span>{name}</span>
                                 <ul>
-                                    {list.map((item) => (
-                                        <li>
-                                            <a href={link(item.id)}>{removeSuffix(item.id, ".md").split("/").at(-1)}</a>
-                                        </li>
-                                    ))}
+                                    {list
+                                        .sort((a, b) => intlCollator.compare(a.id, b.id))
+                                        .map((item) => {
+                                            const url = link(item.id);
+                                            const title = removeSuffix(item.id, ".md").split("/").at(-1);
+                                            const active = decodeURIComponent(Astro.url.pathname) === url;
+
+                                            return (
+                                                <li>
+                                                    <a href={url} class={active ? "active" : undefined}>
+                                                        {title}
+                                                    </a>
+                                                </li>
+                                            );
+                                        })}
                                 </ul>
                             </li>
                         );
+                    }
                 })
         }
     </ul>

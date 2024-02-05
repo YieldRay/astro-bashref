@@ -1,0 +1,20 @@
+---
+import { base } from "../../deploy.config.mjs";
+---
+
+<div class="search">
+    <a href={`${base}/search/`}>
+        <input type="search" />
+    </a>
+</div>
+
+<style>
+    .search a {
+        display: block;
+    }
+
+    .search input {
+        display: block;
+        width: 100%;
+    }
+</style>
