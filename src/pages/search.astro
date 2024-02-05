@@ -1,10 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { base } from "../../deploy.config.mjs";
 ---
 
 <Layout title="BashRef">
-    <link href="/pagefind/pagefind-ui.css" rel="stylesheet" slot="head" />
-    <script src="/pagefind/pagefind-ui.js" slot="head"></script>
+    <link href={`${base}/pagefind/pagefind-ui.css`} rel="stylesheet" slot="head" />
+    <script src={`${base}/pagefind/pagefind-ui.js`} slot="head"></script>
     <style slot="head" is:inline>
         #search {
             --pagefind-ui-primary: #eeeeee;
